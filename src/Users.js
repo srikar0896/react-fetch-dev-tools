@@ -1,12 +1,22 @@
 import React from "react";
 import useDebuggableFetch from "./useDebuggableFetch";
-import { List, Avatar, Card, Icon, Skeleton } from "antd";
+import { List, Avatar, Collapse, Card, Alert, Icon, Skeleton } from "antd";
 import ModuleWithDescription from "./ModuleWithDescription";
 import User from "./User";
+
+const { Panel } = Collapse;
 
 import moduleData from "./ModulesData.json";
 
 const { Meta } = Card;
+
+const customPanelStyle = {
+  background: "#f7f7f7",
+  borderRadius: 4,
+  marginBottom: 24,
+  border: 0,
+  overflow: "hidden"
+};
 
 const Users = props => {
   const { response, error, isLoading } = useDebuggableFetch({
@@ -25,11 +35,50 @@ const Users = props => {
     }
   });
 
-  if (error) return "Error";
+  if (error)
+    return (
+      <Alert
+        message="Error"
+        style={{ textAlign: "start" }}
+        description={
+          <div>
+            <p>
+              There was an error processing the request, please try again later
+            </p>
+            <Collapse
+              bordered={false}
+              defaultActiveKey={["2"]}
+              expandIcon={({ isActive }) => (
+                <Icon type="caret-right" rotate={isActive ? 90 : 0} />
+              )}
+            >
+              <Panel header="Detailed Error" key="1" style={customPanelStyle}>
+                <div style={{ display: "flex" }}>
+                  <label style={{ marginRight: 8 }}>Status:</label>
+                  <p>{error.status}</p>
+                </div>
+                <div style={{ display: "flex" }}>
+                  <label style={{ marginRight: 8 }}>Message:</label>
+                  <p>{error.errorMessage}</p>
+                </div>
+              </Panel>
+            </Collapse>
+          </div>
+        }
+        type="error"
+        showIcon
+      />
+    );
+
   if (isLoading)
     return (
-      <Icon type="loading" style={{ fontSize: 24, color: "#108ee9" }} spin />
+      <div>
+        <Card loading style={{ marginBottom: 10 }} />
+        <Card loading style={{ marginBottom: 10 }} />
+        <Card loading style={{ marginBottom: 10 }} />
+      </div>
     );
+
   return (
     <div style={{ display: "flex", flexWrap: "wrap" }}>
       {response.map(user => (

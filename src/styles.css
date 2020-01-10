@@ -4,6 +4,7 @@
   background: #bae7ff;
   padding: 12px;
   position: relative;
+  height: 100vh;
 }
 
 .horizontal {
@@ -83,6 +84,7 @@
 .app_container {
   display: grid;
   grid-template-columns: 73% 24%;
+  grid-gap: 14px;
 }
 
 .app-section_title {
@@ -99,9 +101,14 @@
   /* border-bottom: 2px dashed lightgray; */
   justify-content: center;
   padding: 3px 0;
-  background: #d3d3d39e;
+  /* background: #d3d3d39e; */
+  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAABZJREFUeNpi2r9//38gYGAEESAAEGAAasgJOgzOKCoAAAAASUVORK5CYII=);
 }
 
 .debugger__container-drag_handle:hover {
   cursor: grab;
+}
+
+label {
+  font-family: "Source Code Pro", monospace;
 }

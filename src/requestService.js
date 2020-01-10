@@ -49,20 +49,22 @@ export const registerRequest = requestOptions => {
       const { requestId: resolvedRequestId, customResponse } = resolvedRequest;
       if (resolvedRequestId === requestId) {
         console.log("RESOLVED", customResponse);
-        if (customResponse) {
-          resolve(JSON.parse(customResponse));
-        } else {
-          resolve(requestOptions.response);
-        }
+        resolve(customResponse);
+        // if (customResponse) {
+        //   resolve(JSON.parse(customResponse));
+        // } else {
+        //   resolve(requestOptions.response);
+        // }
         removeFromProcessingList(requestId);
       }
     });
 
     requestRejector.subscribe(rejectRequest => {
       console.log(rejectRequest);
-      const { requestId: rejectRequestId } = rejectRequest;
+      const { requestId: rejectRequestId, customError } = rejectRequest;
       if (rejectRequestId === requestId) {
-        reject(requestOptions.error);
+        // reject(requestOptions.error);
+        reject(customError);
         removeFromProcessingList(rejectRequestId);
       }
     });
