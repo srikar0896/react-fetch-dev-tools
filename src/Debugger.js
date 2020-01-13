@@ -41,8 +41,8 @@ export default props => {
             </div>
             <Icon type="drag" className="handle" />
           </Row> */}
-            {requests.map(request => (
-              <RequestItem request={request} />
+            {requests.map((request, index) => (
+              <RequestItem request={request} key={request.requestId} />
             ))}
           </div>
         </div>

@@ -13,6 +13,7 @@ const RequestSettings = ({
   request,
   closePopover,
   onUpdateResponse,
+  response,
   error,
   onUpdateError
 }) => {
@@ -21,7 +22,7 @@ const RequestSettings = ({
   );
 
   const [responseData, setResponseData] = useState(
-    JSON.stringify(request.requestOptions.response, null, 2)
+    JSON.stringify(response, null, 2)
   );
 
   const [
@@ -50,7 +51,7 @@ const RequestSettings = ({
         <label>Payload:</label>
         <Button
           type="ghost"
-          style={{ margin: "8px 8px 8px 44px" }}
+          style={{ margin: "8px 8px 8px 42px" }}
           onClick={() => {
             closePopover();
             setIsCustomResponseWindowOpen(true);

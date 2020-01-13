@@ -1,12 +1,40 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Icon, Row, Typography, Popover, Tooltip, Drawer } from "antd";
 import { resolveRequest, rejectRequest } from "./requestService";
 import RequestSettings from "./RequestSettings";
 
 export default ({ request }) => {
   const [isPopoverVisible, setIsPopoverVisible] = useState(false);
-  const [response, setResponse] = useState(request.requestOptions.response);
-  const [error, setError] = useState(request.requestOptions.error);
+  const [response, setResponse] = useState([]);
+  const [error, setError] = useState({});
+
+  useEffect(() => {
+    if (request.requestOptions.autoResolveDuration) {
+      setTimeout(() => {
+        resolveRequest({
+          requestId: request.requestId,
+          customResponse:
+            (request.requestOptions && request.requestOptions.response) || []
+        });
+        console.log("AUTO RESOLVE");
+      }, request.requestOptions.autoResolveDuration);
+    }
+
+    if (request.requestOptions && request.requestOptions.response) {
+      setResponse(request.requestOptions.response);
+    } else {
+      setResponse([]);
+    }
+
+    if (request.requestOptions && request.requestOptions.error) {
+      setError(request.requestOptions.error);
+    } else {
+      setError({
+        status: 500,
+        errorMessage: "Internal server error"
+      });
+    }
+  }, []);
 
   return (
     <div className="request__item" key={request.requestId}>
@@ -15,12 +43,13 @@ export default ({ request }) => {
           <Icon
             type="check-circle"
             style={{ color: "green" }}
-            onClick={() =>
+            onClick={() => {
+              console.log(request, response);
               resolveRequest({
                 requestId: request.requestId,
                 customResponse: response
-              })
-            }
+              });
+            }}
           />
         </Tooltip>
         <Tooltip title="Reject">
@@ -45,6 +74,7 @@ export default ({ request }) => {
             <RequestSettings
               request={request}
               error={error}
+              response={response}
               onUpdateError={setError}
               onUpdateResponse={setResponse}
               closePopover={() => setIsPopoverVisible(false)}

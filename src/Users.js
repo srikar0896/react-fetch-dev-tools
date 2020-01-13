@@ -1,12 +1,18 @@
 import React from "react";
 import useDebuggableFetch from "./useDebuggableFetch";
-import { List, Avatar, Collapse, Card, Alert, Icon, Skeleton } from "antd";
-import ModuleWithDescription from "./ModuleWithDescription";
+import {
+  List,
+  Avatar,
+  Empty,
+  Collapse,
+  Card,
+  Alert,
+  Icon,
+  Skeleton
+} from "antd";
 import User from "./User";
 
 const { Panel } = Collapse;
-
-import moduleData from "./ModulesData.json";
 
 const { Meta } = Card;
 
@@ -52,7 +58,7 @@ const Users = props => {
                 <Icon type="caret-right" rotate={isActive ? 90 : 0} />
               )}
             >
-              <Panel header="Detailed Error" key="1" style={customPanelStyle}>
+              <Panel header="More details" key="1" style={customPanelStyle}>
                 <div style={{ display: "flex" }}>
                   <label style={{ marginRight: 8 }}>Status:</label>
                   <p>{error.status}</p>
@@ -78,6 +84,14 @@ const Users = props => {
         <Card loading style={{ marginBottom: 10 }} />
       </div>
     );
+
+  if (response.length === 0) {
+    return (
+      <Card>
+        <Empty description="No  Members in this organization" />
+      </Card>
+    );
+  }
 
   return (
     <div style={{ display: "flex", flexWrap: "wrap" }}>

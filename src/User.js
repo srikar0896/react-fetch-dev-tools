@@ -2,7 +2,8 @@ import React from "react";
 import Truncate from "react-truncate";
 import { Avatar, Icon } from "antd";
 
-const ModuleWithDescription = ({ user }) => {
+const User = ({ user }) => {
+  console.log(user);
   return (
     <div
       style={{
@@ -30,4 +31,4 @@ const ModuleWithDescription = ({ user }) => {
   );
 };
 
-export default ModuleWithDescription;
+export default User;

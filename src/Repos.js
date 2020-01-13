@@ -1,7 +1,7 @@
 import React from "react";
 import useDebuggableFetch from "./useDebuggableFetch";
-import { List, Avatar, Icon, Alert, Card, Collapse } from "antd";
-import ModuleWithDescription from "./ModuleWithDescription";
+import { List, Avatar, Icon, Alert, Card, Collapse, Empty } from "antd";
+import Repo from "./Repo";
 import moduleData from "./ModulesData.json";
 
 const { Panel } = Collapse;
@@ -21,7 +21,8 @@ const Repos = props => {
     error: {
       status: 401,
       errorMessage: "Not Authorized"
-    }
+    },
+    autoResolveDuration: 2000
   });
 
   if (error)
@@ -41,7 +42,7 @@ const Repos = props => {
                 <Icon type="caret-right" rotate={isActive ? 90 : 0} />
               )}
             >
-              <Panel header="Detailed Error" key="1" style={customPanelStyle}>
+              <Panel header="More Details" key="1" style={customPanelStyle}>
                 <div style={{ display: "flex" }}>
                   <label style={{ marginRight: 8 }}>Status:</label>
                   <p>{error.status}</p>
@@ -68,10 +69,18 @@ const Repos = props => {
       </div>
     );
 
+  if (response.length === 0) {
+    return (
+      <Card>
+        <Empty description="No public repositories found in this organization" />
+      </Card>
+    );
+  }
+
   return (
     <div style={{ display: "flex", flexWrap: "wrap" }}>
       {response.map(item => (
-        <ModuleWithDescription module={item} />
+        <Repo module={item} />
       ))}
     </div>
   );
