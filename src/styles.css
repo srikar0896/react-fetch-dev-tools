@@ -1,7 +1,12 @@
+html {
+  height: 100vh;
+  position: absolute;
+}
+
 .App {
   font-family: sans-serif;
   text-align: center;
-  background: #bae7ff;
+  /* background: #bae7ff; */
   padding: 12px;
   position: relative;
   height: 100%;
@@ -111,4 +116,10 @@
 
 label {
   font-family: "Source Code Pro", monospace;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
 }

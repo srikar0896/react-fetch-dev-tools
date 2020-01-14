@@ -16,7 +16,6 @@ export default ({ request }) => {
           customResponse:
             (request.requestOptions && request.requestOptions.response) || []
         });
-        console.log("AUTO RESOLVE");
       }, request.requestOptions.autoResolveDuration);
     }
 
@@ -44,7 +43,6 @@ export default ({ request }) => {
             type="check-circle"
             style={{ color: "green" }}
             onClick={() => {
-              console.log(request, response);
               resolveRequest({
                 requestId: request.requestId,
                 customResponse: response

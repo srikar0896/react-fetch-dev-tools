@@ -21,8 +21,7 @@ const Repos = props => {
     error: {
       status: 401,
       errorMessage: "Not Authorized"
-    },
-    autoResolveDuration: 2000
+    }
   });
 
   if (error)

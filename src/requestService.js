@@ -9,7 +9,7 @@ const requestResolver = new BehaviorSubject("");
 const requestRejector = new BehaviorSubject("");
 const processingRequestsSubscriber = new BehaviorSubject(processingRequests);
 
-export const registerRequest = requestOptions => {
+const registerRequest = requestOptions => {
   const requestId = uuid();
   const r = {
     requestId,
@@ -23,7 +23,6 @@ export const registerRequest = requestOptions => {
       const { requestId: resolvedRequestId, customResponse } = resolvedRequest;
 
       if (resolvedRequestId === requestId) {
-        console.log("RESOLVED", customResponse);
         resolve(customResponse);
         // if (customResponse) {
         //   resolve(JSON.parse(customResponse));
@@ -35,7 +34,6 @@ export const registerRequest = requestOptions => {
     });
 
     requestRejector.subscribe(rejectRequest => {
-      console.log(rejectRequest);
       const { requestId: rejectRequestId, customError } = rejectRequest;
       if (rejectRequestId === requestId) {
         // reject(requestOptions.error);
@@ -62,13 +60,16 @@ const removeFromProcessingList = requestId => {
 const resolveRequest = request => {
   const { requestId } = request;
 
-  console.log(request);
-
   let r = requests;
   r = r.filter(i => i.requestId !== requestId);
   requests = r;
   requestsSubscriber.next(r);
   requestResolver.next(request);
+};
+
+const cancelAllRequests = () => {
+  requests = [];
+  requestsSubscriber.next([]);
 };
 
 const rejectRequest = request => {
@@ -82,8 +83,7 @@ const rejectRequest = request => {
 };
 
 export default {
-  subscriber: requestsSubscriber,
-  registerRequest
+  subscriber: requestsSubscriber
 };
 
-export { resolveRequest, rejectRequest };
+export { resolveRequest, rejectRequest, cancelAllRequests, registerRequest };

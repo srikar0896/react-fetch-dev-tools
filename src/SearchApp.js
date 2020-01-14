@@ -42,9 +42,6 @@ export default props => {
   const searchInputRef = createRef();
 
   useEffect(() => {
-    console.log("____MOUNT____");
-    console.log(searchInputRef);
-
     const searchText$ = fromEvent(
       document.querySelector(".search-input"),
       "keyup"
@@ -60,7 +57,7 @@ export default props => {
     );
 
     const result$ = searchText$
-      .pipe(concatMap(queryString => fetchResults(queryString)))
+      .pipe(switchMap(queryString => fetchResults(queryString)))
       .subscribe(value => {
         setResponse(value);
         setIsLoading(false);

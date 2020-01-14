@@ -1,7 +1,7 @@
-import requestsService from "./requestService";
+import { registerRequest } from "./requestService";
 
 const fetch = options => {
-  return requestsService.registerRequest(options);
+  return registerRequest(options);
 };
 
 export default fetch;

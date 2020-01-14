@@ -8,7 +8,7 @@ const User = ({ user }) => {
     <div
       style={{
         display: "flex",
-        background: "white",
+        background: "#794bc4",
         padding: "10px 10px 10px 18px",
         alignItems: "center",
         width: 320,
@@ -21,11 +21,11 @@ const User = ({ user }) => {
           {user.charAt(0).toUpperCase()}
         </Avatar>
       </div>
-      <div style={{ paddingTop: 12, fontSize: 16, flex: 1 }}>
+      <div style={{ paddingTop: 12, fontSize: 16, flex: 1, color: "white" }}>
         <p className="module-description">{user}</p>
       </div>
       <div style={{ margin: "0 10px" }}>
-        <Icon type="select" />
+        <Icon type="select" style={{ color: "#fff" }} />
       </div>
     </div>
   );

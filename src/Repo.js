@@ -8,7 +8,7 @@ const ModuleWithDescription = ({ module }) => {
       style={{
         display: "flex",
         flexDirection: "column",
-        background: "white",
+        background: "#bae7ff",
         padding: "18px 16px 18px 18px",
         width: 320,
         margin: 8,
@@ -16,7 +16,9 @@ const ModuleWithDescription = ({ module }) => {
       }}
     >
       <div style={{ marginBottom: 8, display: "flex" }}>
-        <a className="module-title">{module.moduleName}</a>
+        <a className="module-title" style={{ fontSize: 18 }}>
+          {module.moduleName}
+        </a>
       </div>
       <div>
         <p className="module-description">

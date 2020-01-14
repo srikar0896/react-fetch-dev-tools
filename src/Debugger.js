@@ -14,7 +14,7 @@ export default props => {
     );
 
     return () => subscription.unsubscribe();
-  });
+  }, []);
 
   return (
     <React.Fragment>
