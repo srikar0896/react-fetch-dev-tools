@@ -16,6 +16,50 @@ import {
 } from "rxjs/operators";
 import fetch from "./fetch";
 import uuid from "uuid";
+import versionService, { registerVersion } from "./versionService";
+
+let count = 0;
+
+const saveNotes = (text, versionId) => {
+  count +=1;
+  const version = {
+    content: text,
+    id: uuid(),
+    timestamp: Date.now(),
+  };
+
+  return fetch({
+    endpoint: `/save?v=${count}`,
+    response: version
+  });
+}
+
+function registerListener(setIsLoading, onNewVersionAdd){
+  const titleText$ = fromEvent(
+    document.querySelector("#editor-notes-title"),
+    "keyup"
+  ).pipe(
+    map(event => event.target.value),
+    map(notes => {
+      setIsLoading(true);
+      return notes;
+    }),
+    // startWith(""),
+    debounceTime(600),
+    distinctUntilChanged()
+  );
+
+  const result$ = titleText$
+    .pipe(
+      concatMap(saveNotes)
+      )
+    .subscribe(response => {
+      console.log({response});
+      registerVersion(response);
+      onNewVersionAdd(response.id);
+      setIsLoading(false);
+    });
+}
 
 export default props => {
   const [title, setTitle] = useState("");
@@ -23,91 +67,27 @@ export default props => {
   const [isLoading, setIsLoading] = useState(false);
   const [activeVersion, setActiveVersion] = useState(null);
 
-  function reducer(state, action) {
-    switch (action.type) {
-      case "register":
-        return [...state, action.data];
-      default:
-        throw new Error();
-    }
-  }
+  const [versions, setVersions] = useState([]);
 
-  function localReducer(state, action) {
-    switch (action.type) {
-      case "register":
-        console.log(state, action.data);
-        return [...state, action.data];
-      default:
-        throw new Error();
-    }
-  }
-
-  const [versions, versionsDispatcher] = useReducer(reducer, []);
-  const [localVersions, localVersionDispatcher] = useReducer(localReducer, []);
-
-  const saveNotes = (payload, versionId) =>
-    fetch({
-      endpoint: `/save?v=${versionId}`,
-      response: payload
+  
+  useEffect(() => {
+    registerListener(setIsLoading, (version) => {
+      setActiveVersion(version)
     });
+  }, []);
 
   useEffect(() => {
-    const titleText$ = fromEvent(
-      document.querySelector("#editor-notes-title"),
-      "keyup"
-    ).pipe(
-      map(event => event.target.value),
-      map(notes => {
-        setIsLoading(true);
-        return notes;
-      }),
-      // startWith(""),
-      debounceTime(2000),
-      distinctUntilChanged(),
-      map(queryString => {
-        console.log("REGISTER", queryString, localVersions);
-        localVersionDispatcher({
-          type: "register",
-          data: {
-            id: localVersions.length + 1,
-            content: queryString
-          }
-        });
-        return queryString;
-      })
-    );
-
-    const result$ = titleText$
-      .pipe(
-        concatMap(queryString =>
-          saveNotes(
-            {
-              id: localVersions.length + 1,
-              content: queryString
-            },
-            localVersions.length + 1
-          )
-        ),
-        distinctUntilChanged()
-      )
-      .subscribe(response => {
-        versionsDispatcher({
-          type: "register",
-          data: response
-        });
-        console.log("RES ID", response.id);
-        setActiveVersion(response.id);
-        setIsLoading(false);
-      });
-    // return () => result$.unsubscribe();
-  }, [localVersions]);
-
-  console.log("LOCAL VERSIONS", localVersions);
+    versionService.subscribe((versions) => {
+      console.log(versions);
+      setVersions(versions);
+    });
+  }, []);
 
   const handleTitleChange = text => {
     setTitle(text);
   };
-
+    
+  console.log({activeVersion});
   return (
     <div style={{ display: "flex" }}>
       <div style={{ flexBasis: "80%" }}>
@@ -160,25 +140,15 @@ export default props => {
       <div>
         <div>
           <div>
-            <h4 className="app-section_title">Local Versions</h4>
+            <h4 className="app-section_title">Versions</h4>
           </div>
-          {localVersions.map((version, index) => (
-            <p
-              key={index}
-              style={{ color: version.id === activeVersion ? "red" : "black" }}
-            >
-              {version.id}
-            </p>
-          ))}
-        </div>
-        <div>
-          <div>
-            <h4 className="app-section_title">Backend Versions</h4>
-          </div>
-          Active - {activeVersion}
           {versions.map((version, index) => (
             <p
               key={index}
+              onClick={() => {
+                setTitle(version.content);
+                setActiveVersion(version.id);
+              }}
               style={{ color: version.id === activeVersion ? "red" : "black" }}
             >
               {version.id}

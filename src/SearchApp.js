@@ -76,7 +76,7 @@ export default props => {
         ref={searchInputRef}
         className="search-input"
         placeholder="input search text"
-        onSearch={value => console.log(value)}
+        // onSearch={value => console.log(value)}
         style={{ width: 200, marginBottom: 12 }}
       />
       <div>

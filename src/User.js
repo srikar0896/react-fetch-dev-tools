@@ -3,7 +3,6 @@ import Truncate from "react-truncate";
 import { Avatar, Icon } from "antd";
 
 const User = ({ user }) => {
-  console.log(user);
   return (
     <div
       style={{
