@@ -42,7 +42,7 @@ html {
 }
 
 .debugger__container {
-  position: absolute;
+  position: fixed;
   top: 35%;
   left: 35%;
   background: white;
