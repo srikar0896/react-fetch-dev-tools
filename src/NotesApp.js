@@ -87,6 +87,9 @@ export default props => {
       setActiveVersion(version)
     });
 
+    versionService.subscribe((versions) => {
+      setVersions(versions);
+    });
   }, []);
 
   useEffect(() => {
@@ -97,14 +100,18 @@ export default props => {
       }, 600);
 
     }
-  }, [isLoading]);
 
-  useEffect(() => {
-    versionService.subscribe((versions) => {
-      console.log(versions);
-      setVersions(versions);
-    });
-  }, []);
+    console.log(isLoading);
+    function handleWindowUnload(event){
+      if(isLoading){
+        event.returnValue = "Changes that you made, may not be saved. Are you sure, you want to exit?"
+      }
+    }
+
+    window.addEventListener("beforeunload", handleWindowUnload);
+    
+    return window.removeEventListener("beforeunload", handleWindowUnload);
+  }, [isLoading]);
 
   const handleTitleChange = text => {
     const version = {
@@ -116,7 +123,6 @@ export default props => {
   };
 
 
-  console.log({versions});
   return (
     <div style={{ display: "flex" }}>
       <div style={{ flexBasis: "80%" }}>
@@ -198,7 +204,6 @@ export default props => {
               version={version}
               isCurrentVersion={version.id === activeVersion}
               onClick={() => {
-                console.log(version);
                 setNotes(version.notes);
                 setActiveVersion(version.id);
               }}
