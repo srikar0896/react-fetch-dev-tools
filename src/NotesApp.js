@@ -3,7 +3,7 @@ import Editor from "react-simple-code-editor";
 import { highlight, languages } from "prismjs/components/prism-core";
 import "prismjs/components/prism-clike";
 import "prismjs/components/prism-javascript";
-import { fromEvent } from "rxjs";
+import { fromEvent, throwError } from "rxjs";
 import {
   map,
   forkJoin,
@@ -12,34 +12,34 @@ import {
   distinctUntilChanged,
   switchMap,
   mergeMap,
-  concatMap
+  concatMap,
+  retry,
+  catchError
 } from "rxjs/operators";
 import fetch from "./fetch";
 import uuid from "uuid";
-import versionService, { registerVersion } from "./versionService";
+import versionService, { registerVersion, currentVersionSubscriber, setCurrentVersion } from "./versionService";
+import Version from "./Version";
+import { Button } from "antd";
 
 let count = 0;
 
-const saveNotes = (text, versionId) => {
+const saveNotes = (content) => {
   count +=1;
   const version = {
-    content: text,
+    notes: content,
     id: uuid(),
     timestamp: Date.now(),
   };
 
   return fetch({
     endpoint: `/save?v=${count}`,
-    response: version
+    response: version,
   });
 }
 
-function registerListener(setIsLoading, onNewVersionAdd){
-  const titleText$ = fromEvent(
-    document.querySelector("#editor-notes-title"),
-    "keyup"
-  ).pipe(
-    map(event => event.target.value),
+function registerChangeListener(editorId, setIsLoading, onNewVersionAdd){
+  const titleText$ = currentVersionSubscriber.pipe(
     map(notes => {
       setIsLoading(true);
       return notes;
@@ -51,7 +51,20 @@ function registerListener(setIsLoading, onNewVersionAdd){
 
   const result$ = titleText$
     .pipe(
-      concatMap(saveNotes)
+      concatMap(() => {
+        console.log(document.querySelector("#editor-notes-title").textContent);
+        console.log(document.querySelector("#editor-notes-content").textContent);
+        return saveNotes({
+          title: document.querySelector("#editor-notes-title").textContent,
+          content: document.querySelector("#editor-notes-content").textContent,
+        })
+      }),
+      catchError(err => {
+        console.log('Handling error locally and rethrowing it...', err);
+        count -= 1;
+        return throwError(err);
+      }),
+      retry(2),
       )
     .subscribe(response => {
       console.log({response});
@@ -62,19 +75,29 @@ function registerListener(setIsLoading, onNewVersionAdd){
 }
 
 export default props => {
-  const [title, setTitle] = useState("");
-  const [notes, setNotes] = useState("");
+  const [notes, setNotes] = useState({ title: "", content: ""});
   const [isLoading, setIsLoading] = useState(false);
   const [activeVersion, setActiveVersion] = useState(null);
-
+  const [showSavedLabel, setShowSavedLabel] = useState(false);
   const [versions, setVersions] = useState([]);
-
+  
   
   useEffect(() => {
-    registerListener(setIsLoading, (version) => {
+    registerChangeListener("editor-notes-title", setIsLoading, (version) => {
       setActiveVersion(version)
     });
+
   }, []);
+
+  useEffect(() => {
+    if(!isLoading) {
+      setShowSavedLabel(true);
+      setTimeout(() => {
+        setShowSavedLabel(false);
+      }, 600);
+
+    }
+  }, [isLoading]);
 
   useEffect(() => {
     versionService.subscribe((versions) => {
@@ -84,21 +107,40 @@ export default props => {
   }, []);
 
   const handleTitleChange = text => {
-    setTitle(text);
+    const version = {
+      title: text,
+      content: notes.content
+    };
+    currentVersionSubscriber.next(version);
+    setNotes(version);
   };
-    
-  console.log({activeVersion});
+
+
+  console.log({versions});
   return (
     <div style={{ display: "flex" }}>
       <div style={{ flexBasis: "80%" }}>
-        <div style={{ display: "flex" }}>
+        <div style={{ display: "flex", alignItems: 'baseline' }}>
           <span className="app-section_title">Notes</span>
-          <div>{isLoading && "Saving..."}</div>
+          <div>
+            {isLoading && !showSavedLabel && (
+              <Button loading  type="link" size="small">
+                Saving
+              </Button>
+            )}
+            {showSavedLabel && (
+              <Button type="link" size="small" icon="check" style={{ color: "green" }}>
+                Saved
+              </Button>
+            )}
+          </div>
         </div>
         <div className="editor" style={{ margin: 8 }}>
           <Editor
+            autoFocus
+            autoSave
             textareaId="editor-notes-title"
-            value={title}
+            value={notes.title}
             onValueChange={value => handleTitleChange(value)}
             highlight={code => highlight(code, languages.js)}
             padding={10}
@@ -116,8 +158,16 @@ export default props => {
         </div>
         <div className="editor" style={{ margin: 8 }}>
           <Editor
-            value={notes}
-            onValueChange={value => setNotes(value)}
+            value={notes.content}
+            onValueChange={value => {
+                const version = {
+                  title: notes.title,
+                  content: value
+                };
+                currentVersionSubscriber.next(version);
+                setNotes(version)
+              }
+            }
             textareaId="editor-notes-content"
             highlight={code => highlight(code, languages.js)}
             padding={10}
@@ -140,19 +190,19 @@ export default props => {
       <div>
         <div>
           <div>
-            <h4 className="app-section_title">Versions</h4>
+            <h4 className="app-section_title">Version History</h4>
           </div>
           {versions.map((version, index) => (
-            <p
-              key={index}
+            <Version
+              key={version.id}
+              version={version}
+              isCurrentVersion={version.id === activeVersion}
               onClick={() => {
-                setTitle(version.content);
+                console.log(version);
+                setNotes(version.notes);
                 setActiveVersion(version.id);
               }}
-              style={{ color: version.id === activeVersion ? "red" : "black" }}
-            >
-              {version.id}
-            </p>
+            />
           ))}
         </div>
       </div>

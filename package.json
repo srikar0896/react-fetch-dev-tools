@@ -13,6 +13,7 @@
   "dependencies": {
     "@monaco-editor/react": "3.0.1",
     "antd": "3.26.6",
+    "moment": "^2.24.0",
     "monaco-editor": "0.19.2",
     "prismjs": "1.19.0",
     "react": "16.12.0",
