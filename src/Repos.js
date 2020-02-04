@@ -1,6 +1,6 @@
 import React from "react";
 import useDebuggableFetch from "./useDebuggableFetch";
-import { List, Avatar, Icon, Alert, Card, Collapse, Empty } from "antd";
+import { List, Avatar, Icon, Alert, Card, Collapse, Empty, Result } from "antd";
 import Repo from "./Repo";
 import moduleData from "./ModulesData.json";
 
@@ -24,15 +24,40 @@ const Repos = props => {
     }
   });
 
+  const getErrorMessage = (err) => {
+    console.log(err);
+    switch (err.status) {
+      case 401:
+        return "Not authenticated."
+      case 404:
+        return "Orgnization not found."
+      case 403:
+        return "Not enough permission to access this organization or this organization might be private organization and you are not a memeber of it."
+      case 404:
+        return "Orgnization not found."
+      case 500:
+      return "Something went wrong while processing the request, Please try again later."
+      default:
+        return "Internal server error, Please try again later."
+    }
+  };
+
   if (error)
     return (
+      <>
+      <Result
+        status={error.status.toString()}
+        // title="500"
+        // subTitle="Sorry, the server is wrong."
+        // extra={<Button type="primary">Back Home</Button>}
+      />
       <Alert
         message="Error"
         style={{ textAlign: "start" }}
         description={
           <div>
             <p>
-              There was an error processing the request, please try again later
+              {getErrorMessage(error)}
             </p>
             <Collapse
               bordered={false}
@@ -57,6 +82,7 @@ const Repos = props => {
         type="error"
         showIcon
       />
+      </>
     );
 
   if (isLoading)
